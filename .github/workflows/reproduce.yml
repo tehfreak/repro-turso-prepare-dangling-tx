@@ -1,0 +1,49 @@
+name: reproduce
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        turso: ["0.8.3", "0.9.0-pre.5"]
+    name: turso ${{ matrix.turso }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: pin turso ${{ matrix.turso }}
+        run: sed -i 's/^turso = { version = "=[^"]*"/turso = { version = "=${{ matrix.turso }}"/' Cargo.toml
+
+      - run: cargo build
+
+      - name: show the resolved version
+        run: cargo tree -i turso -e normal --depth 0
+
+      - run: cargo run --quiet | tee repro.out
+
+      - name: assert verdicts
+        run: |
+          grep '^VERDICT' repro.out > verdicts.out
+          diff - verdicts.out <<'EOF'
+          VERDICT dirty-read prepare: BROKEN
+          VERDICT dirty-read prepare_cached: BROKEN
+          VERDICT dirty-read old-statement: BROKEN
+          VERDICT dirty-read old-clone: BROKEN
+          VERDICT dirty-read workaround: WORKS
+          VERDICT dirty-read connection: WORKS
+          VERDICT lost-write prepare: BROKEN
+          VERDICT lost-write prepare_cached: BROKEN
+          VERDICT lost-write connection: WORKS
+          VERDICT stale-snapshot prepare: BROKEN
+          VERDICT stale-snapshot prepare_cached: BROKEN
+          VERDICT stale-snapshot connection: WORKS
+          EOF
