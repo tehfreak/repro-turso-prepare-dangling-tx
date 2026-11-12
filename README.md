@@ -7,8 +7,9 @@ transaction that should be gone.
 
 ## Status
 
-Not reported upstream yet. No issue or PR covered it on 2026-11-12. The closest ones are about
-other things: https://github.com/tursodatabase/turso/issues/4597 (an unfinished `Rows`) and
+Reported upstream as https://github.com/tursodatabase/turso/issues/11746, unassigned. No issue or
+PR covered it when it was filed. The closest ones are about other things:
+https://github.com/tursodatabase/turso/issues/4597 (an unfinished `Rows`) and
 https://github.com/tursodatabase/turso/issues/8477 (a failed `COMMIT` in core).
 
 Checked with turso 0.8.3, the latest release, and 0.9.0-pre.5, the latest pre-release. main at
